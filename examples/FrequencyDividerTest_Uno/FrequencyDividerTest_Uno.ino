@@ -2,8 +2,8 @@
 
 void setup() {
   pinMode(9, OUTPUT); // OCR1A divided frequency output
-  SimpleCLK.init(11);
-  SimpleCLK.start(11, 1000000); // feed this output to Pin 5 (PD5/T1 - becomes an input on reset)
+  SimpleClockGenerator.init(11);
+  SimpleClockGenerator.start(11, 1000000); // feed this output to Pin 5 (PD5/T1 - becomes an input on reset)
   TIMSK1 = 0; // no interrupts
   TCCR1A = 0;
   TCCR1B = 0;

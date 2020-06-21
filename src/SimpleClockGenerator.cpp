@@ -3,7 +3,7 @@
 // Arduino Uno, Duemilanove, Diecimila, LilyPad, Mini, Fio, etc
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega48__)
 
-void SimpleClockGenerator::init(uint8_t pin) {
+void SimpleClockGeneratorClass::init(uint8_t pin) {
   if (pin == 6 || pin == 5) { // OC0 - 8-bit - will stop millis() and micros() functions and disable delay() but not delayMicroseconds()
     if (MillisMicrosStopped == false) {
       MillisMicrosStopped = true;
@@ -44,7 +44,7 @@ void SimpleClockGenerator::init(uint8_t pin) {
   }
 }
 
-uint32_t SimpleClockGenerator::start(uint8_t pin, uint32_t frequency) {
+uint32_t SimpleClockGeneratorClass::start(uint8_t pin, uint32_t frequency) {
   unsigned long ActualFrequency = 0;
   unsigned long FrequencyHighCount = F_CPU;
   FrequencyHighCount /= 2; // toggle frequency is half CPU speed
@@ -179,7 +179,7 @@ uint32_t SimpleClockGenerator::start(uint8_t pin, uint32_t frequency) {
   return ActualFrequency;
 }
 
-void SimpleClockGenerator::resume(uint8_t pin) {
+void SimpleClockGeneratorClass::resume(uint8_t pin) {
   switch (pin) {
     case 6: // OC0A
       TCCR0A |= 0b01000000; // CTC toggle
@@ -202,7 +202,7 @@ void SimpleClockGenerator::resume(uint8_t pin) {
   }
 }
 
-void SimpleClockGenerator::stop(uint8_t pin) {
+void SimpleClockGeneratorClass::stop(uint8_t pin) {
   switch (pin) {
     case 6: // OC0A
       TCCR0A &= 0b00111111; // disconnect the pin
@@ -225,7 +225,7 @@ void SimpleClockGenerator::stop(uint8_t pin) {
   }
 }
 
-void SimpleClockGenerator::RestartMillisMicros() { // will start millis() and micros() functions from the count at the time of disabling
+void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() and micros() functions from the count at the time of disabling
   TCCR0A = Old_TCCR0A;
   TCCR0B = Old_TCCR0B;
   TCNT0 = Old_TCNT0;
@@ -240,4 +240,4 @@ void SimpleClockGenerator::RestartMillisMicros() { // will start millis() and mi
 #error "Unsupported chip, please edit SimpleClockGenerator library with timer+counter definitions"
 #endif
 
-SimpleClockGenerator SimpleCLK;
+SimpleClockGeneratorClass SimpleClockGenerator;

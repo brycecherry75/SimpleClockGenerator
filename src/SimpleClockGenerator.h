@@ -5,7 +5,7 @@
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega48__)
 // Arduino Uno, Duemilanove, Diecimila, LilyPad, Mini, Fio, etc
-class SimpleClockGenerator {
+class SimpleClockGeneratorClass {
   public:
     void init(uint8_t pin);
     uint32_t start(uint8_t pin, uint32_t frequency); // using Pin 5 or 6 will stop millis()/micros() function including delay()/delayMicroseconds()
@@ -36,6 +36,6 @@ class SimpleClockGenerator {
 #error "Unknown chip, please edit SimpleClockGenerator library with timer+counter definitions"
 #endif
 
-extern SimpleClockGenerator SimpleCLK;
+extern SimpleClockGeneratorClass SimpleClockGenerator;
 
 #endif

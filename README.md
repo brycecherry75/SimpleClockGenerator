@@ -4,6 +4,7 @@ SimpleClockGenerator is a simple clock generator for OCxx pins on an Arduino boa
 
 Revisions:
 v1.0	First release
+v1.1	Change of function wording of SimpleCLK.xxx to SimpleClockGenerator.xxx to correspond with library name
 
 FEATURES:
 Supported boards (and derivatives): Uno (Mega/Leonardo/ATmega8 support planned)

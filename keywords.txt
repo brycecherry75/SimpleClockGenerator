@@ -1,5 +1,4 @@
 SimpleClockGenerator	KEYWORD1
-SimpleCLK	KEYWORD1
 init	KEYWORD2
 start	KEYWORD2
 stop	KEYWORD2
