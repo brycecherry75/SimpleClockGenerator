@@ -1,27 +1,12 @@
 #include "SimpleClockGenerator.h"
 
+SimpleClockGeneratorClass SimpleClockGenerator;
+
 // Arduino Uno, Duemilanove, Diecimila, LilyPad, Mini, Fio, etc
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega48__)
 
 void SimpleClockGeneratorClass::init(uint8_t pin) {
   if (pin == 6 || pin == 5) { // OC0 - 8-bit - will stop millis() and micros() functions and disable delay() but not delayMicroseconds()
-    if (MillisMicrosStopped == false) {
-      MillisMicrosStopped = true;
-      Old_TIMSK0 = TIMSK0;
-      TIMSK0 = 0; // disabling the interrupt first will ensure proper restoration
-      Old_TIFR0 = TIFR0;
-      TIFR0 = 0;
-      Old_OCR0B = OCR0B;
-      OCR0B = 0;
-      Old_OCR0A = OCR0A;
-      OCR0A = 0;
-      Old_TCNT0 = TCNT0;
-      TCNT0 = 0;
-      Old_TCCR0B = TCCR0B;
-      TCCR0B = 0;
-      Old_TCCR0A = TCCR0A;
-      TCCR0A = 0;
-    }
     pinMode(pin, OUTPUT);
     TIMSK0 = 0; // no interrupts
     TCCR0A = 0;
@@ -225,19 +210,19 @@ void SimpleClockGeneratorClass::stop(uint8_t pin) {
   }
 }
 
-void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() and micros() functions from the count at the time of disabling
-  TCCR0A = Old_TCCR0A;
-  TCCR0B = Old_TCCR0B;
-  TCNT0 = Old_TCNT0;
-  OCR0A = Old_OCR0A;
-  OCR0B = Old_OCR0B;
-  TIFR0 = Old_TIFR0;
-  TIMSK0 = Old_TIMSK0; // enabling the interrupt last will ensure proper restoration
-  MillisMicrosStopped = false;
+#ifndef NO_MILLIS_MICROS_RESTORE
+void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() and micros() and reenable delay() functions from the count at the time of disabling
+  // values observed after delay() then millis() or micros()
+  TCCR0A = 0x03;
+  TCNT0 = 0x00; // always incrementing and overflowing
+  OCR0A = 0x00;
+  OCR0B = 0x00;
+  TIFR0 = 0x06;
+  TCCR0B = 0x03;
+  TIMSK0 = 0x01;
 }
+#endif
 
 #else
 #error "Unsupported chip, please edit SimpleClockGenerator library with timer+counter definitions"
 #endif
-
-SimpleClockGeneratorClass SimpleClockGenerator;
