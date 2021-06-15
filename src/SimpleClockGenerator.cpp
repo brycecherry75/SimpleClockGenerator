@@ -29,6 +29,25 @@ void SimpleClockGeneratorClass::init(uint8_t pin) {
   }
 }
 
+void SimpleClockGeneratorClass::initDividerAtTpin(uint8_t pin) {
+  if (pin == 6 || pin == 5) { // OC0 - 8-bit - will stop millis() and micros() functions and disable delay() but not delayMicroseconds()
+    pinMode(4, INPUT_PULLUP);
+    TIMSK0 = 0; // no interrupts
+    TCCR0A = 0;
+    TCCR0B = 0;
+    TCCR0A = 0b00000010; // WGM00/01 = 0/1 - CTC toggle on OCR0A
+    TCCR0B = 0b00000111; // WGM02 = 0 - CTC toggle on OCR0A, rising edge input on T0
+  }
+  else if (pin == 9 || pin == 10) { // OC1 - 16 bit
+    pinMode(5, INPUT_PULLUP);
+    pinMode(pin, OUTPUT);
+    TIMSK1 = 0; // no interrupts
+    TCCR1A = 0;
+    TCCR1B = 0; // WGM10/11 = 0/0 - CTC toggle on OCR1A
+    TCCR1B = 0b00001111; // WGM12/13 = 1/0 - CTC toggle on OCR0A, rising edge input on T1
+  }
+}
+
 uint32_t SimpleClockGeneratorClass::start(uint8_t pin, uint32_t frequency) {
   unsigned long ActualFrequency = 0;
   unsigned long FrequencyHighCount = F_CPU;
@@ -151,8 +170,8 @@ uint32_t SimpleClockGeneratorClass::start(uint8_t pin, uint32_t frequency) {
     }
     else if (Divider <= 65535 && (pin == 9 || pin == 10)) { // 16 bit divider
       TCCR1B &= 0b11111000; // reset prescaler
-      OCR1A = Divider;
       TCCR1B |= Prescaler;
+      OCR1A = Divider;
       if (pin == 9) {
         TCCR1A |= 0b01000000;
       }
@@ -187,6 +206,268 @@ void SimpleClockGeneratorClass::resume(uint8_t pin) {
   }
 }
 
+void SimpleClockGeneratorClass::writeDivider(uint8_t pin, uint16_t value) {
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+      if (value <= 255) {
+        OCR0A = value;
+      }
+      break;
+    case 9: // OC1A
+    case 10: // OC1B
+      if (value <= 65535) {
+        OCR1A = value;
+      }
+      break;
+    case 11: // OC2A
+    case 3: // OC2B
+      if (value <= 255) {
+        OCR2A = value;
+      }
+      break;
+  }
+}
+
+uint16_t SimpleClockGeneratorClass::readDivider(uint8_t pin) {
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+      return OCR0A;
+      break;
+    case 9: // OC1A
+    case 10: // OC1B
+      return OCR1A;
+      break;
+    case 11: // OC2A
+    case 3: // OC2B
+      return OCR2A;
+      break;
+  }
+}
+
+uint16_t SimpleClockGeneratorClass::readPrescaler(uint8_t pin) {
+  byte temp;
+  uint16_t PrescalerRatio = 0;
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+      temp = TCCR0B;
+      temp &= 0b00000111;
+      switch (temp) {
+        case 1:
+          PrescalerRatio = 1;
+          break;
+        case 2:
+          PrescalerRatio = 8;
+          break;
+        case 3:
+          PrescalerRatio = 64;
+          break;
+        case 4:
+          PrescalerRatio = 256;
+          break;
+        case 5:
+          PrescalerRatio = 1024;
+          break;
+      }
+      break;
+    case 9: // OC1A
+    case 10: // OC1B
+      temp = TCCR1B;
+      temp &= 0b00000111;
+      switch (temp) {
+        case 1:
+          PrescalerRatio = 1;
+          break;
+        case 2:
+          PrescalerRatio = 8;
+          break;
+        case 3:
+          PrescalerRatio = 64;
+          break;
+        case 4:
+          PrescalerRatio = 256;
+          break;
+        case 5:
+          PrescalerRatio = 1024;
+          break;
+      }
+      break;
+    case 11: // OC2A
+    case 3: // OC2B
+      temp = TCCR2B;
+      temp &= 0b00000111;
+      switch (temp) {
+        case 1:
+          PrescalerRatio = 1;
+          break;
+        case 2:
+          PrescalerRatio = 8;
+          break;
+        case 3:
+          PrescalerRatio = 32;
+          break;
+        case 4:
+          PrescalerRatio = 64;
+          break;
+        case 5:
+          PrescalerRatio = 128;
+          break;
+        case 6:
+          PrescalerRatio = 256;
+          break;
+        case 7:
+          PrescalerRatio = 1024;
+          break;
+      }
+      break;
+  }
+  return PrescalerRatio;
+}
+
+void SimpleClockGeneratorClass::incrementDivider(uint8_t pin, uint16_t value) {
+  uint32_t NewValue;
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+      NewValue = OCR0A;
+      break;
+    case 9: // OC1A
+    case 10: // OC1B
+      NewValue = OCR1A;
+      break;
+    case 11: // OC2A
+    case 3: // OC2B
+      NewValue = OCR2A;
+      break;
+  }
+  NewValue += value;
+  if ((pin == 9 || pin == 10) && NewValue <= 65535UL) {
+    OCR1A = NewValue;
+  }
+  else if (NewValue <= 255) {
+    switch (pin) {
+      case 6: // OC0A
+      case 5: // OC0B
+        OCR0A = NewValue;
+        break;
+      case 11: // OC2A
+      case 3: // OC2B
+        OCR2A = NewValue;
+        break;
+    }
+  }
+}
+
+void SimpleClockGeneratorClass::decrementDivider(uint8_t pin, uint16_t value) {
+  uint32_t NewValue;
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+      NewValue = OCR0A;
+      break;
+    case 9: // OC1A
+    case 10: // OC1B
+      NewValue = OCR1A;
+      break;
+    case 11: // OC2A
+    case 3: // OC2B
+      NewValue = OCR2A;
+      break;
+  }
+  if (value <= NewValue) {
+    NewValue -= value;
+    switch (pin) {
+      case 6: // OC0A
+      case 5: // OC0B
+        OCR0A = NewValue;
+        break;
+      case 9: // OC1A
+      case 10: // OC1B
+        OCR1A = NewValue;
+        break;
+      case 11: // OC2A
+      case 3: // OC2B
+        OCR2A = NewValue;
+        break;
+    }
+  }
+}
+
+void SimpleClockGeneratorClass::setPrescaler(uint8_t pin, uint16_t value) {
+  uint8_t PrescalerRatio = 0;
+  switch (pin) {
+    case 6:
+    case 5:
+    case 9:
+    case 10:
+      switch (value) {
+        case 1:
+          PrescalerRatio = 1;
+          break;
+        case 8:
+          PrescalerRatio = 2;
+          break;
+        case 64:
+          PrescalerRatio = 3;
+          break;
+        case 256:
+          PrescalerRatio = 4;
+          break;
+        case 1024:
+          PrescalerRatio = 5;
+          break;
+      }
+      break;
+    case 11:
+    case 3:
+      switch (value) {
+        case 1:
+          PrescalerRatio = 1;
+          break;
+        case 8:
+          PrescalerRatio = 2;
+          break;
+        case 32:
+          PrescalerRatio = 3;
+          break;
+        case 64:
+          PrescalerRatio = 4;
+          break;
+        case 128:
+          PrescalerRatio = 5;
+          break;
+        case 256:
+          PrescalerRatio = 6;
+          break;
+        case 1024:
+          PrescalerRatio = 7;
+          break;
+      }
+      break;
+  }
+  if (PrescalerRatio != 0) {
+    switch (pin) {
+      case 6:
+      case 5:
+        TCCR0B &= 0b11111000;
+        TCCR0B |= PrescalerRatio;
+        break;
+      case 9:
+      case 10:
+        TCCR1B &= 0b11111000;
+        TCCR1B |= PrescalerRatio;
+        break;
+      case 11:
+      case 3:
+        TCCR2B &= 0b11111000;
+        TCCR2B |= PrescalerRatio;
+        break;
+    }
+  }
+}
+
 void SimpleClockGeneratorClass::stop(uint8_t pin) {
   switch (pin) {
     case 6: // OC0A
@@ -210,7 +491,6 @@ void SimpleClockGeneratorClass::stop(uint8_t pin) {
   }
 }
 
-#ifndef NO_MILLIS_MICROS_RESTORE
 void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() and micros() and reenable delay() functions from the count at the time of disabling
   // values observed after delay() then millis() or micros()
   TCCR0A = 0x03;
@@ -221,7 +501,6 @@ void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() a
   TCCR0B = 0x03;
   TIMSK0 = 0x01;
 }
-#endif
 
 #else
 #error "Unsupported chip, please edit SimpleClockGenerator library with timer+counter definitions"
