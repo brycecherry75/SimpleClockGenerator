@@ -8,6 +8,7 @@ v1.1.0	Change of function wording of SimpleCLK.xxx to SimpleClockGenerator.xxx t
 v1.1.1	Eliminated requirement for backup registers affecting millis()/micros()/delay() functions
 v1.1.2	Demo sketch is now fully interactive
 v1.2.0	Added external source frequency divider; FrequencyDividerTest is now incorporated in the main demo sketch
+v1.2.1	Added function to return available prescalers on a given pin
 
 FEATURES:
 Supported boards (and derivatives): Uno (Mega/Leonardo/ATmega8 support planned)
@@ -18,7 +19,7 @@ Frequency on output pin is not changed if frequency is outside its limits ((F_CP
 Can divide frequency at a Tx pin connected to a timer/counter and output it on a pin which is connected to the same timer/counter where frequency output = (frequency input / 2) / (divider value + 1)
 
 KNOWN LIMITATIONS:
-Differenent frequencies on different OCx pins within a pair (e.g. 25 kHz on OC0A and 50 kHz on OC0B) are not supported due to AVR hardware limitations
+Differenent frequencies on different OCx pins within a set (e.g. 25 kHz on OC0A and 50 kHz on OC0B) are not supported due to AVR hardware limitations
 
 USAGE:
 init(pin): Initialize clock output for a given pin
@@ -32,6 +33,7 @@ start(pin, frequency): Start clock output at a given frequency for a certain pin
 resume(pin): Resume clock output on a certain pin
 stop(pin): Stop clock output on a certain pin
 RestartMillisMicros(): Disables clock output on pins used by the timer (usually Timer/Counter 0 and its corresponding OCxx pins) and restarts millis()/micros()/delay()
+ReturnAvailablePrescalers(pin, *AvaiablePrescalers): Returns available internal prescalers to *AvailablePrescalers (word) based on a given pin; a 0 indicates the end of the number of prescalers and the array passed to *AvailablePrescalers is AvailablePrescalersPerTimer
 
 PIN DETAILS WITH DIVIDER RESOLUTIONS (First pin with Tx can be used for Tx input frequency division - T pin is not used by millis/micros/delay):
 Uno (and derivatives): (9/10/(T1: 5) - used by millis/micros/delay) (16 bit), (6/5/(T0: 4))/(11/3) (8 bit)

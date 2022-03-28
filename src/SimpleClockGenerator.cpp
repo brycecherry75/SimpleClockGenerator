@@ -502,6 +502,34 @@ void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() a
   TIMSK0 = 0x01;
 }
 
+void SimpleClockGeneratorClass::ReturnAvailablePrescalers(byte pin, word *AvailablePrescalers) {
+  for (int i = 0; i < AvailablePrescalersPerTimer; i++) {
+    AvailablePrescalers[i] = 0;
+  }
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0A
+    case 9: // OC1A
+    case 10: // OC1A
+      AvailablePrescalers[0] = 1;
+      AvailablePrescalers[1] = 8;
+      AvailablePrescalers[2] = 64;
+      AvailablePrescalers[3] = 256;
+      AvailablePrescalers[4] = 1024;
+      break;
+    case 11: // OC2A
+    case 3: // OC2A
+      AvailablePrescalers[0] = 1;
+      AvailablePrescalers[1] = 8;
+      AvailablePrescalers[2] = 32;
+      AvailablePrescalers[3] = 64;
+      AvailablePrescalers[4] = 128;
+      AvailablePrescalers[5] = 256;
+      AvailablePrescalers[6] = 1024;
+      break;
+  }
+}
+
 #else
 #error "Unsupported chip, please edit SimpleClockGenerator library with timer+counter definitions"
 #endif

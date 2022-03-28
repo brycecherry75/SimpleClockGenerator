@@ -12,6 +12,7 @@
    DECREMENT pin value - decrements divider on a given set of pins by a given value
    PRESCALER pin (1/8/32/64/128/256/1024) - sets internal clock prescaler on a given set of pins
    RESTART_MILLIS_MICROS (DELAY_TEST) - disables clock output on pins used by Timer 0 and restores millis()/micros()/delay() - DELAY_TEST tests delay()
+   AVAILABLE_PRESCALERS pin - displays available prescalers on a given pin
 
 */
 
@@ -233,6 +234,24 @@ void loop() {
         Serial.print(F("millis() is now "));
         Serial.println(millis());
         Serial.println(F("If you see the above line 5 seconds from the previous line, millis()/micros()/delay() has been successfully restored"));
+      }
+      else if (strcmp(field, "AVAILABLE_PRESCALERS") == 0) {
+        getField(field, 1);
+        byte pin = atoi(field);
+        word PrescalerPins[AvailablePrescalersPerTimer];
+        SimpleClockGenerator.ReturnAvailablePrescalers(pin, PrescalerPins);
+        Serial.print(F("Available internal prescalers on this pin: "));
+        for (int i = 0; i < AvailablePrescalersPerTimer; i++) {
+          word temp = PrescalerPins[i];
+          if (temp != 0) {
+            Serial.print(temp);
+            Serial.print(F(" "));
+          }
+          else {
+            break;
+          }
+        }
+        Serial.println(F(""));;
       }
       else {
         ValidField = false;

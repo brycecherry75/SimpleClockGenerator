@@ -12,3 +12,5 @@ setPrescaler	KEYWORD2
 stop	KEYWORD2
 resume	KEYWORD2
 RestartMillisMicros	KEYWORD2
+ReturnAvailablePrescalers	KEYWORD2
+AvailablePrescalersPerTimer	LITERAL1

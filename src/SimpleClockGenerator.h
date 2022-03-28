@@ -4,6 +4,9 @@
 #include <Arduino.h>
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega88__) || defined(__AVR_ATmega48__)
+
+#define AvailablePrescalersPerTimer 7
+
 // Arduino Uno, Duemilanove, Diecimila, LilyPad, Mini, Fio, etc
 class SimpleClockGeneratorClass {
   public:
@@ -19,6 +22,7 @@ class SimpleClockGeneratorClass {
     void stop(uint8_t pin);
     void resume(uint8_t pin);
     void RestartMillisMicros();
+    void ReturnAvailablePrescalers(byte pin, word *AvailablePrescalers);
 };
 
 extern SimpleClockGeneratorClass SimpleClockGenerator;
