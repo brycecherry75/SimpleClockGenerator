@@ -502,15 +502,15 @@ void SimpleClockGeneratorClass::RestartMillisMicros() { // will start millis() a
   TIMSK0 = 0x01;
 }
 
-void SimpleClockGeneratorClass::ReturnAvailablePrescalers(byte pin, word *AvailablePrescalers) {
+void SimpleClockGeneratorClass::ReturnAvailablePrescalers(uint8_t pin, uint16_t *AvailablePrescalers) {
   for (int i = 0; i < AvailablePrescalersPerTimer; i++) {
     AvailablePrescalers[i] = 0;
   }
   switch (pin) {
     case 6: // OC0A
-    case 5: // OC0A
+    case 5: // OC0B
     case 9: // OC1A
-    case 10: // OC1A
+    case 10: // OC1B
       AvailablePrescalers[0] = 1;
       AvailablePrescalers[1] = 8;
       AvailablePrescalers[2] = 64;
@@ -518,7 +518,7 @@ void SimpleClockGeneratorClass::ReturnAvailablePrescalers(byte pin, word *Availa
       AvailablePrescalers[4] = 1024;
       break;
     case 11: // OC2A
-    case 3: // OC2A
+    case 3: // OC2B
       AvailablePrescalers[0] = 1;
       AvailablePrescalers[1] = 8;
       AvailablePrescalers[2] = 32;
@@ -528,6 +528,36 @@ void SimpleClockGeneratorClass::ReturnAvailablePrescalers(byte pin, word *Availa
       AvailablePrescalers[6] = 1024;
       break;
   }
+}
+
+uint32_t SimpleClockGeneratorClass::ReturnMaximumDividerValue(uint8_t pin) {
+  uint32_t MaximumValue = 0;
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+    case 11: // OC2A
+    case 3: // OC2A
+      MaximumValue = 255;
+      break;
+    case 9: // OC1A
+    case 10: // OC1B
+      MaximumValue = 65535UL;
+      break;
+  }
+  return MaximumValue;
+}
+
+bool SimpleClockGeneratorClass::ExternalClockCapabilityCheck(uint8_t pin) {
+  bool CanBeExternallyClocked = false;
+  switch (pin) {
+    case 6: // OC0A
+    case 5: // OC0B
+    case 9: // OC1A
+    case 10: // OC1B
+      CanBeExternallyClocked = true;
+      break;
+  }
+  return CanBeExternallyClocked;
 }
 
 #else

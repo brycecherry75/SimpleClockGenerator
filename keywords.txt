@@ -13,4 +13,6 @@ stop	KEYWORD2
 resume	KEYWORD2
 RestartMillisMicros	KEYWORD2
 ReturnAvailablePrescalers	KEYWORD2
+ReturnMaximumDividerValue	KEYWORD2
+ExternalClockCapabilityCheck	KEYWORD2
 AvailablePrescalersPerTimer	LITERAL1

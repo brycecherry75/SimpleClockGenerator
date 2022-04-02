@@ -22,7 +22,9 @@ class SimpleClockGeneratorClass {
     void stop(uint8_t pin);
     void resume(uint8_t pin);
     void RestartMillisMicros();
-    void ReturnAvailablePrescalers(byte pin, word *AvailablePrescalers);
+    void ReturnAvailablePrescalers(uint8_t pin, uint16_t *AvailablePrescalers);
+    uint32_t ReturnMaximumDividerValue(uint8_t pin);
+    bool ExternalClockCapabilityCheck(uint8_t pin);
 };
 
 extern SimpleClockGeneratorClass SimpleClockGenerator;
