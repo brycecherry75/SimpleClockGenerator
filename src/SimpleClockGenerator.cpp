@@ -183,6 +183,19 @@ uint32_t SimpleClockGeneratorClass::start(uint8_t pin, uint32_t frequency) {
   return ActualFrequency;
 }
 
+void SimpleClockGeneratorClass::startPLLdivider(uint8_t pin, uint32_t ReferenceFrequency, uint32_t frequency) {
+  if (ExternalClockCapabilityCheck(pin) == true && (frequency % (ReferenceFrequency * 2)) == 0) {
+    ReferenceFrequency *= 2;
+    frequency /= ReferenceFrequency;
+    frequency--;
+    if (frequency <= ReturnMaximumDividerValue(pin) == true) {
+      initDividerAtTpin(pin);
+      writeDivider(pin, frequency);
+      resume(pin);
+    }
+  }
+}
+
 void SimpleClockGeneratorClass::resume(uint8_t pin) {
   switch (pin) {
     case 6: // OC0A
@@ -326,6 +339,17 @@ uint16_t SimpleClockGeneratorClass::readPrescaler(uint8_t pin) {
   return PrescalerRatio;
 }
 
+uint32_t SimpleClockGeneratorClass::readPLLfrequency(uint8_t pin, uint32_t ReferenceFrequency) {
+  uint32_t frequency = 0;
+  if (ExternalClockCapabilityCheck(pin) == true) {
+    ReferenceFrequency *= 2;
+    frequency = ReferenceFrequency;
+    frequency *= readDivider(pin);
+    frequency += ReferenceFrequency;
+  }
+  return frequency;
+}
+
 void SimpleClockGeneratorClass::incrementDivider(uint8_t pin, uint16_t value) {
   uint32_t NewValue;
   switch (pin) {
@@ -392,6 +416,22 @@ void SimpleClockGeneratorClass::decrementDivider(uint8_t pin, uint16_t value) {
         OCR2A = NewValue;
         break;
     }
+  }
+}
+
+void SimpleClockGeneratorClass::incrementPLLfrequency(uint8_t pin, uint32_t ReferenceFrequency, uint32_t value) {
+  if (ExternalClockCapabilityCheck(pin) == true && (value % (ReferenceFrequency * 2)) == 0) {
+    ReferenceFrequency *= 2;
+    value /= ReferenceFrequency;
+    incrementDivider(pin, value);
+  }
+}
+
+void SimpleClockGeneratorClass::decrementPLLfrequency(uint8_t pin, uint32_t ReferenceFrequency, uint32_t value) {
+  if (ExternalClockCapabilityCheck(pin) == true && (value % (ReferenceFrequency * 2)) == 0) {
+    ReferenceFrequency *= 2;
+    value /= ReferenceFrequency;
+    decrementDivider(pin, value);
   }
 }
 

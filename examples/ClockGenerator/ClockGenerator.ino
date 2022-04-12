@@ -4,12 +4,16 @@
 
    Commands:
    START pin frequency - starts clock output on a given pin
+   START_PLL pin reference_frequency frequency - starts PLL divider function
    (DIVIDE_EXT/DIVIDER) pin value - DIVIDE_EXT divides clock output at the counter/divider input T pin and outputs it to a pin on the same counter/divider while DIVIDER only divides the value + 1 at the current pin
    RESUME pin - resumes clock output on a given pin
    STOP pin - stops clock output on a given pin
    READ pin - reads the current divider value on a given set of pins
+   READ_PLL pin reference_frequency - reads the currently programmed PLL frequency
    INCREMENT pin value - increments divider on a given set of pins by a given value
    DECREMENT pin value - decrements divider on a given set of pins by a given value
+   INCREMENT_PLL pin reference_frequency value - increments PLL frequency
+   DECREMENT_PLL pin reference_frequency value - decrements PLL frequency
    PRESCALER pin (1/8/32/64/128/256/1024) - sets internal clock prescaler on a given set of pins
    RESTART_MILLIS_MICROS (DELAY_TEST) - disables clock output on pins used by Timer 0 and restores millis()/micros()/delay() - DELAY_TEST tests delay()
    PIN_PARAMETERS pin - displays available prescalers on a given pin
@@ -114,6 +118,20 @@ void loop() {
           ValidField = false;
         }
       }
+      else if (strcmp(field, "START_PLL") == 0) {
+        getField(field, 1);
+        byte pin = atoi(field);
+        if (SimpleClockGenerator.ReturnMaximumDividerValue(pin) != 0 && SimpleClockGenerator.ExternalClockCapabilityCheck(pin) == true) { // must be an OCxx pin clockable by a hardware T pin
+          getField(field, 2);
+          unsigned long ReferenceFrequency = atol(field);
+          getField(field, 3);
+          unsigned long frequency = atol(field);
+          SimpleClockGenerator.startPLLdivider(pin, ReferenceFrequency, frequency);
+        }
+        else {
+          ValidField = false;
+        }
+      }
       else if (strcmp(field, "DIVIDE_EXT") == 0 || strcmp(field, "DIVIDER") == 0) {
         bool InitExternalDivider = true;
         if (strcmp(field, "DIVIDER") == 0) {
@@ -176,6 +194,19 @@ void loop() {
           ValidField = false;
         }
       }
+      else if (strcmp(field, "READ_PLL") == 0) {
+        getField(field, 1);
+        byte pin = atoi(field);
+        if (SimpleClockGenerator.ReturnMaximumDividerValue(pin) != 0 && SimpleClockGenerator.ExternalClockCapabilityCheck(pin) == true) { // must be an OCxx pin clockable by a hardware T pin
+          getField(field, 2);
+          unsigned long ReferenceFrequency = atol(field);
+          Serial.print(F("VCO frequency is "));
+          Serial.println(SimpleClockGenerator.readPLLfrequency(pin, ReferenceFrequency));
+        }
+        else {
+          ValidField = false;
+        }
+      }
       else if (strcmp(field, "INCREMENT") == 0) {
         getField(field, 1);
         byte pin = atoi(field);
@@ -195,6 +226,34 @@ void loop() {
         unsigned long value = atol(field);
         if (SimpleClockGenerator.ReturnMaximumDividerValue(pin) != 0 && value <= SimpleClockGenerator.ReturnMaximumDividerValue(pin)) {
           SimpleClockGenerator.decrementDivider(pin, value);
+        }
+        else {
+          ValidField = false;
+        }
+      }
+      else if (strcmp(field, "INCREMENT_PLL") == 0) {
+        getField(field, 1);
+        byte pin = atoi(field);
+        getField(field, 2);
+        unsigned long ReferenceFrequency = atol(field);
+        getField(field, 3);
+        unsigned long value = atol(field);
+        if (SimpleClockGenerator.ExternalClockCapabilityCheck(pin) == true && (value % (ReferenceFrequency * 2)) == 0) {
+          SimpleClockGenerator.incrementPLLfrequency(pin, ReferenceFrequency, value);
+        }
+        else {
+          ValidField = false;
+        }
+      }
+      else if (strcmp(field, "DECREMENT_PLL") == 0) {
+        getField(field, 1);
+        byte pin = atoi(field);
+        getField(field, 2);
+        unsigned long ReferenceFrequency = atol(field);
+        getField(field, 3);
+        unsigned long value = atol(field);
+        if (SimpleClockGenerator.ExternalClockCapabilityCheck(pin) == true && (value % (ReferenceFrequency * 2)) == 0) {
+          SimpleClockGenerator.decrementPLLfrequency(pin, ReferenceFrequency, value);
         }
         else {
           ValidField = false;

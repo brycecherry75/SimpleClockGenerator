@@ -2,12 +2,15 @@ SimpleClockGenerator	KEYWORD1
 init	KEYWORD2
 initDividerAtTpin	KEYWORD2
 start	KEYWORD2
-startDivider	KEYWORD2
+startPLLdivider	KEYWORD2
 writeDivider	KEYWORD2
 readDivider	KEYWORD2
 readPrescaler	KEYWORD2
+readPLLfrequency	KEYWORD2
 incrementDivider	KEYWORD2
 decrementDivider	KEYWORD2
+incrementPLLfrequency	KEYWORD2
+decrementPLLfrequency	KEYWORD2
 setPrescaler	KEYWORD2
 stop	KEYWORD2
 resume	KEYWORD2

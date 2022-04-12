@@ -18,6 +18,8 @@ v1.2.1	Added function to return available prescalers on a given pin
 
 v1.2.2	Return of maximum value on a given pin and function to check if a given pin supports external clocking; with these functions among those included in v1.2.1, demo sketch is now universal
 
+v1.2.3  Added PLL frequency functions (with an external VCO and phase comparator) for pins supporting clocking via a T hardware function pin.
+
 FEATURES:
 
 Supported boards (and derivatives): Uno (Mega/Leonardo/ATmega8 support planned)
@@ -49,9 +51,17 @@ incrementDivider(pin, value): Increments divider by a given value on a given pin
 
 decrementDivider(pin, value): Decrements divider by a given value on a given pin (will not underflow)
 
-readPrescaler(pin);  Returns a uint16_t value from the timer prescaler connected to this pin
+incrementPLLfrequency(pin, ReferenceFrequency, value): Decrements PLL frequency by a given value which with double of ReferenceFrequency must not have a remainder
+
+decrementPLLfrequency(pin, ReferenceFrequency, value): Increments PLL frequency by a given value which with double of ReferenceFrequency must not have a remainder
+
+readPrescaler(pin):  Returns a uint16_t value from the timer prescaler connected to this pin
+
+readPLLfrequency(pin, ReferenceFrequency): Returns a uint32_t value based on the timer value and ReferenceFrequency - value will be 0 if pin does not support clocking via a hardware T pin
 
 start(pin, frequency): Start clock output at a given frequency for a certain pin - return value is actual frequency rounded to its closest integer
+
+startPLLdivider(pin, ReferenceFrequency, frequency): Initialize and start a divider for an PLL connected to an external VCO - frequency and double reference values must not have a remainder and only pins supporting clocking via a hardware T pin are supported
 
 resume(pin): Resume clock output on a certain pin
 

@@ -13,11 +13,15 @@ class SimpleClockGeneratorClass {
     void init(uint8_t pin);
     void initDividerAtTpin(uint8_t pin);
     uint32_t start(uint8_t pin, uint32_t frequency); // using Pin 5 or 6 will stop millis()/micros() function including delay()/delayMicroseconds()
+    void startPLLdivider(uint8_t pin, uint32_t ReferenceFrequency, uint32_t frequency);
     void writeDivider(uint8_t pin, uint16_t value);
     uint16_t readDivider(uint8_t pin);
     uint16_t readPrescaler(uint8_t pin);
+    uint32_t readPLLfrequency(uint8_t pin, uint32_t ReferenceFrequency);
     void incrementDivider(uint8_t pin, uint16_t value);
     void decrementDivider(uint8_t pin, uint16_t value);
+    void incrementPLLfrequency(uint8_t pin, uint32_t ReferenceFrequency, uint32_t value);
+    void decrementPLLfrequency(uint8_t pin, uint32_t ReferenceFrequency, uint32_t value);
     void setPrescaler(uint8_t pin, uint16_t value);
     void stop(uint8_t pin);
     void resume(uint8_t pin);
